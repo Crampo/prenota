@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>FunLab Prenotazioni</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#9E2A2B">
+<link rel="icon" href="icona.png">
+<link rel="apple-touch-icon" href="icona.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: testata fissa con schede, contenuto a colonna unica; il calendario diventa griglia a 7 colonne sugli schermi larghi */
+:root{
+  --bg:#EEF3F5; --paper:#FFFFFF; --ink:#10252E; --muted:#526870; --line:#D3DEE2; --sea:#0B5D7A; --sea-soft:#DDEDF3; --on-sea:#FFFFFF;
+  --red:#B42318; --red-soft:#FDE8E6; --amber:#8A5300; --amber-soft:#FCEFD2; --green:#23714A; --green-soft:#DFF2E7;
+  --violet:#5B3FA8; --violet-soft:#ECE7FA; --grey:#4A5458; --grey-soft:#E4E8EA; --wa:#1C8A4C;
+  --brand:#9E2A2B; --logo-bg:#FFFFFF;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif; --f-body:"Atkinson Hyperlegible","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B161B; --paper:#13222A; --ink:#E3EDF0; --muted:#9BB0B7; --line:#27414C; --sea:#5FB4D4; --sea-soft:#15394A; --on-sea:#06212C;
+  --red:#FF8C80; --red-soft:#46201C; --amber:#F2BE5C; --amber-soft:#3D2E10; --green:#6FD19B; --green-soft:#15372A;
+  --violet:#BBA6FF; --violet-soft:#2D2550; --grey:#B5C0C4; --grey-soft:#26343A; --wa:#5AD38C; --brand:#F08A84; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B161B; --paper:#13222A; --ink:#E3EDF0; --muted:#9BB0B7; --line:#27414C; --sea:#5FB4D4; --sea-soft:#15394A; --on-sea:#06212C;
+  --red:#FF8C80; --red-soft:#46201C; --amber:#F2BE5C; --amber-soft:#3D2E10; --green:#6FD19B; --green-soft:#15372A;
+  --violet:#BBA6FF; --violet-soft:#2D2550; --grey:#B5C0C4; --grey-soft:#26343A; --wa:#5AD38C; --brand:#F08A84; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 3rem}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--paper)}
+h1,h2,h3{font-family:var(--f-display);font-stretch:85%;line-height:1.15;margin:0;text-wrap:balance}
+h2{font-size:1.35rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:600}
+.wrap{max-width:1040px;margin:0 auto}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--paper);border-bottom:1px solid var(--line);
+  margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:.6rem max(16px,env(safe-area-inset-left,0px)) 0}
+.top-in{max-width:1040px;margin:0 auto}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand-id{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{height:46px;width:auto;background:var(--logo-bg);border-radius:8px;padding:3px 6px;display:block}
+.brand h1{font-size:1.25rem;font-weight:700;color:var(--brand)}
+.brand small{display:block;color:var(--muted);font-size:.85rem}
+.welcome{text-align:center;padding:2rem 1rem}
+.welcome img{height:120px;width:auto;margin:0 auto 1rem;background:var(--logo-bg);border-radius:12px;padding:8px 12px}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-top:.5rem}
+.tabs button{border:0;background:none;font:inherit;font-weight:700;color:var(--muted);padding:.55rem .8rem;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;border-radius:0}
+.tabs button[aria-current="page"]{color:var(--brand);border-bottom-color:var(--brand)}
+.tabs .dot{display:inline-block;min-width:1.3em;padding:0 .35em;margin-left:.3em;border-radius:99px;background:var(--red);color:var(--paper);font-size:.75rem;text-align:center}
+main{padding-top:1rem;display:grid;gap:1rem}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:1rem}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.35em;font:inherit;font-weight:700;font-size:.92rem;border-radius:8px;padding:.5rem .85rem;
+  border:1.5px solid var(--sea);color:var(--sea);background:transparent;cursor:pointer;text-decoration:none;min-height:40px}
+.btn:hover{background:var(--sea-soft)}
+.btn.primary{background:var(--sea);color:var(--on-sea)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.wa{border-color:var(--wa);color:var(--wa)}
+.btn.wa:hover{background:var(--green-soft)}
+.btn.danger{border-color:var(--red);color:var(--red)}
+.btn.danger:hover{background:var(--red-soft)}
+.btn.armed{background:var(--red);color:var(--paper);border-color:var(--red)}
+.btn.ghost{border-color:var(--line);color:var(--ink)}
+.btn:focus-visible,.tabs button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.lesson:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.btn[disabled]{opacity:.5;cursor:wait}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.between{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tile{border-radius:12px;padding:.85rem 1rem;border:1px solid transparent}
+.tile b{display:block;font-family:var(--f-display);font-size:2.2rem;line-height:1;font-variant-numeric:tabular-nums;margin-top:.25rem}
+.tile span{font-size:.9rem;font-weight:700}
+.t-red{background:var(--red-soft);color:var(--red)} .t-amber{background:var(--amber-soft);color:var(--amber)} .t-blue{background:var(--sea-soft);color:var(--sea)}
+.tile.zero{background:var(--paper);border-color:var(--line);color:var(--muted)}
+.todo{display:grid;gap:0}
+.todo-item{display:grid;grid-template-columns:12px minmax(0,1fr);gap:12px;padding:.8rem 0;border-top:1px solid var(--line)}
+.todo-item:first-child{border-top:0}
+.stripe{border-radius:99px}
+.todo-item .acts{margin-top:.5rem}
+.notify{background:var(--green-soft);border:1px solid var(--green);border-radius:12px;padding:.8rem 1rem;display:grid;gap:.5rem}
+.warn{background:var(--amber-soft);color:var(--amber);border-radius:12px;padding:.8rem 1rem;font-weight:700}
+.err{background:var(--red-soft);color:var(--red);border-radius:12px;padding:.8rem 1rem}
+.s-richiesta{background:var(--red)} .s-uno{background:var(--amber)} .s-completa,.s-individuale{background:var(--green)}
+.s-libera{background:var(--line)} .s-evento{background:var(--violet)} .s-annullata{background:var(--grey)}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.day{min-width:0}
+.day-h{font-size:.82rem;font-weight:700;color:var(--muted);padding:.2rem .1rem .4rem}
+.day-h::first-letter,.slot .when span::first-letter{text-transform:uppercase}
+.day-h.today{color:var(--sea)}
+.day-empty{font-size:.8rem;color:var(--muted);padding:.4rem .1rem}
+.lesson{display:block;width:100%;text-align:left;font:inherit;border-radius:10px;padding:.5rem .6rem;margin-bottom:6px;cursor:pointer;border:1.5px solid transparent;color:inherit}
+.lesson .h{font-weight:700;font-size:.9rem}
+.lesson .s{font-size:.8rem}
+.lesson.st-richiesta{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.lesson.st-uno{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+.lesson.st-completa,.lesson.st-individuale{background:var(--green-soft);color:var(--green)}
+.lesson.st-libera{background:var(--paper);border:1.5px dashed var(--line);color:var(--muted)}
+.lesson.st-evento{background:var(--violet-soft);color:var(--violet)}
+.lesson.st-annullata{background:var(--grey-soft);color:var(--grey);text-decoration:line-through}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.82rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.chip{display:inline-block;font-size:.8rem;font-weight:700;padding:.1rem .55rem;border-radius:99px;white-space:nowrap}
+.c-red{background:var(--red-soft);color:var(--red)} .c-amber{background:var(--amber-soft);color:var(--amber)} .c-green{background:var(--green-soft);color:var(--green)}
+.c-grey{background:var(--grey-soft);color:var(--grey)} .c-blue{background:var(--sea-soft);color:var(--sea)} .c-violet{background:var(--violet-soft);color:var(--violet)}
+.list{display:grid}
+.list-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:.75rem 0;border-top:1px solid var(--line)}
+.list-item:first-child{border-top:0}
+.list-item button.link{all:unset;cursor:pointer;display:block}
+.list-item button.link:focus-visible{outline:3px solid var(--sea)}
+.credits{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.credit{border-radius:12px;padding:.75rem 1rem;background:var(--sea-soft);color:var(--sea)}
+.credit b{font-family:var(--f-display);font-size:2rem;display:block;line-height:1;font-variant-numeric:tabular-nums}
+.credit.none{background:var(--grey-soft);color:var(--grey)}
+.slot{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:.85rem 0;border-top:1px solid var(--line)}
+.slot:first-child{border-top:0}
+.slot .when{font-family:var(--f-display);font-weight:700;line-height:1.1}
+.slot .when span{display:block;font-size:.8rem;font-weight:500;color:var(--muted)}
+.form{display:grid;gap:.75rem}
+.form label{display:grid;gap:.25rem;font-weight:700;font-size:.9rem}
+.form .hint{font-weight:400;color:var(--muted);font-size:.82rem}
+input,select,textarea{font:inherit;font-weight:400;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:.5rem .6rem;min-height:42px;width:100%}
+textarea{min-height:90px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem}
+dialog{border:0;border-radius:16px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 32px);overflow:auto;background:var(--paper);color:var(--ink)}
+dialog::backdrop{background:rgba(5,20,28,.55)}
+.dlg{padding:1.1rem 1.1rem 1.3rem;display:grid;gap:1rem}
+.dlg-head{display:flex;justify-content:space-between;align-items:start;gap:10px}
+.x{border:0;background:var(--grey-soft);color:var(--ink);border-radius:99px;width:36px;height:36px;font-size:1.2rem;cursor:pointer;flex:none}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:.7rem 1rem;border-radius:10px;font-weight:700;z-index:50;max-width:calc(100vw - 32px)}
+.demo{background:var(--violet-soft);color:var(--violet);border-radius:12px;padding:.6rem .9rem;font-size:.9rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.demo select{width:auto;min-height:36px;padding:.25rem .5rem}
+.empty{color:var(--muted);padding:.5rem 0}
+.copy{font-family:Consolas,monospace;font-size:.8rem;word-break:break-all;background:var(--bg);padding:.5rem;border-radius:8px}
+@media (max-width:760px){
+  .week{grid-template-columns:minmax(0,1fr);gap:2px}
+  .day{display:grid;grid-template-columns:78px minmax(0,1fr);gap:8px;border-top:1px solid var(--line);padding-top:6px}
+  .day-h{padding-top:.5rem}
+}
+@media (max-width:420px){.tile b{font-size:1.8rem}.tile span{font-size:.8rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top"><div class="top-in">
+  <div class="brand">
+    <div class="brand-id"><img class="logo" id="logo" src="logo.png" alt="FUN Lab" width="80" height="46" onerror="this.hidden=true;document.getElementById('school').hidden=false">
+      <div><h1 id="school" hidden>FunLab Vela</h1><small id="who">Prenotazioni lezioni</small></div></div>
+    <button class="btn ghost" type="button" data-act="refresh" id="refresh" hidden>Aggiorna</button>
+  </div>
+  <nav class="tabs" id="tabs" aria-label="Sezioni"></nav>
+</div></header>
+
+<div class="wrap">
+  <main id="main"><div class="card muted">Caricamento…</div></main>
+</div>
+<dialog id="dlg"><div class="dlg" id="dlg-body"></div></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="config.js"></script>
+<script src="core.js"></script>
+<script>
+const CONF = window.APP_CONFIG || {};
+const API = CONF.apiUrl || '';
+const DEMO = !API || /[?&]demo=1/.test(location.search);
+const TZ = 'Europe/Rome';
+const S = { role: null, view: null, tab: null, week: 0, notify: [], busy: false, open: null };
+let token = null;
+
+const $ = s => document.querySelector(s);
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fDay = new Intl.DateTimeFormat('it-IT', { timeZone: TZ, weekday: 'short', day: 'numeric', month: 'short' });
+const fLong = new Intl.DateTimeFormat('it-IT', { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long' });
+const fTime = new Intl.DateTimeFormat('it-IT', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
+const fDate = new Intl.DateTimeFormat('it-IT', { timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric' });
+const fKey = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+const dayKey = d => fKey.format(new Date(d));
+const when = d => fDay.format(new Date(d)) + ', ' + fTime.format(new Date(d));
+const whenLong = d => fLong.format(new Date(d)) + ' alle ' + fTime.format(new Date(d));
+const firstName = n => String(n || '').split(' ')[0];
+const wa = (tel, text) => tel ? 'https://wa.me/' + tel + (text ? '?text=' + encodeURIComponent(text) : '') : '';
+const studentLink = a => (S.view.impostazioni.IndirizzoApp || location.origin + location.pathname).replace(/\/$/, '') + '/?k=' + a.Token;
+
+const MSG = {
+  conferma: b => `Ciao ${firstName(b.Nome)}, la tua lezione ${b.Corso} di ${whenLong(b.Inizio)} è confermata. A presto in acqua!`,
+  rifiuto: b => `Ciao ${firstName(b.Nome)}, purtroppo la lezione ${b.Corso} di ${whenLong(b.Inizio)} non è disponibile. L'uscita resta tua: scegli un'altra data dall'app.`,
+  promemoria: b => `Ciao ${firstName(b.Nome)}, ti ricordo la lezione ${b.Corso} di domani, ${whenLong(b.Inizio)}.`,
+  annullata: b => `Ciao ${firstName(b.Nome)}, la lezione ${b.Corso} di ${whenLong(b.Inizio)} è annullata${b.Motivo ? ' (' + b.Motivo + ')' : ''}. L'uscita ti è stata restituita: scegli una nuova data dall'app.`,
+  link: a => `Ciao ${firstName(a.Nome)}, da oggi prenoti le uscite da qui: ${studentLink(a)} . È il tuo link personale, non condividerlo.`,
+  tardi: (n, l) => `Ciao, sono ${n}. Vorrei partecipare alla lezione ${l.Corso} di ${whenLong(l.Inizio)}: c'è ancora posto?`,
+  evento: (n, l) => `Ciao, sono ${n}. Vorrei informazioni sull'evento di ${whenLong(l.Inizio)}${l.Note ? ' (' + l.Note + ')' : ''}.`,
+  disdettaTardi: (n, b) => `Ciao, sono ${n}. Non riesco a venire alla lezione ${b.Corso} di ${whenLong(b.Inizio)}.`
+};
+const SEM = { richiesta: 'Da confermare', uno: 'Un solo allievo', completa: 'Completa', individuale: 'Individuale', libera: 'Libera', evento: 'Evento', annullata: 'Annullata' };
+const SEMCHIP = { richiesta: 'c-red', uno: 'c-amber', completa: 'c-green', individuale: 'c-green', libera: 'c-grey', evento: 'c-violet', annullata: 'c-grey' };
+const STATOCHIP = { Richiesta: 'c-red', Confermata: 'c-green', Rifiutata: 'c-grey', Disdetta: 'c-grey', 'Annullata dalla scuola': 'c-grey' };
+
+/* ---------- dati di prova ---------- */
+const demo = { db: null };
+function makeDemo() {
+  const at = (days, h, m) => { const d = new Date(); d.setDate(d.getDate() + days); d.setHours(h, m || 0, 0, 0); return d; };
+  const now = new Date(), y = now.getFullYear();
+  const fine = new Date((now.getMonth() >= 9 ? y + 1 : y) + '-10-31T00:00:00');
+  const A = (ID, Nome, Telefono, Ruolo, Token, Stato, Preferenza, NotePreferenze) => ({ ID, Nome, Email: Nome.split(' ')[0].toLowerCase() + '@example.com', Telefono, Ruolo, Token, Note: '',
+    Stato: Stato || 'Attivo', Preferenza: Preferenza || 'Indifferente', NotePreferenze: NotePreferenze || '' });
+  const P = (ID, AllievoID, Corso, d) => ({ ID, AllievoID, Corso, Uscite: 4, DataAcquisto: at(d, 9), Scadenza: fine, Note: '' });
+  const L = (ID, d, h, Corso, extra) => Object.assign({ ID, Inizio: at(d, h), DurataOre: 3, Corso, Posti: Corso === 'Evento' ? 8 : 2, PostiExtra: 0, Stato: 'Aperta', Motivo: '', Note: '' }, extra || {});
+  const B = (ID, LezioneID, AllievoID, PacchettoID, Stato, d, extra) => Object.assign({ ID, LezioneID, AllievoID, PacchettoID, Stato, DataRichiesta: at(d, 12), Promemoria: false, Avvisato: false }, extra || {});
+  demo.db = {
+    allievi: [A('i', 'Istruttore', '393400000000', 'istruttore', 'demo-istruttore'), A('m', 'Mario Rossi', '393331112233', 'allievo', 'demo-mario', 'Attivo', 'Weekend', 'Lavora in settimana'),
+      A('s', 'Sara Bianchi', '393334445566', 'allievo', 'demo-sara', 'Attivo', 'Feriali', 'Meglio mercoledì o giovedì'), A('l', 'Luca Verdi', '393337778899', 'allievo', 'demo-luca'),
+      A('g', 'Giulia Neri', '393339990000', 'allievo', 'demo-giulia', 'Interessato', 'Weekend'), A('a', 'Anna Galli', '393331230000', 'allievo', 'demo-anna', 'Non attivo', 'Feriali', 'Ha finito il corso Base'),
+      A('p', 'Paolo Riva', '393334560000', 'allievo', 'demo-paolo', 'Spento')],
+    pacchetti: [P('pm', 'm', 'Base', -20), P('ps', 's', 'Base', -20), P('pl', 'l', 'Base', -15), P('pl2', 'l', 'Avanzato', -2)],
+    lezioni: [L('l0', -3, 10, 'Base'), L('l1', 1, 10, 'Base'), L('l2', 3, 15, 'Avanzato'), L('l3', 4, 10, 'Base'), L('l8', 5, 10, 'Base', { Stato: 'Annullata', Motivo: 'meteo' }),
+      L('l4', 6, 10, 'Base'), L('l5', 7, 15, 'Evento', { Note: 'Regata sociale' }), L('l6', 9, 10, 'Avanzato'), L('l7', 11, 10, 'Base')],
+    prenotazioni: [B('b0', 'l0', 'm', 'pm', 'Confermata', -10), B('b1', 'l0', 's', 'ps', 'Confermata', -10), B('b2', 'l1', 'l', 'pl', 'Confermata', -6),
+      B('b3', 'l3', 'm', 'pm', 'Richiesta', -1), B('b4', 'l4', 'm', 'pm', 'Confermata', -5), B('b5', 'l4', 's', 'ps', 'Confermata', -5), B('b6', 'l8', 's', 'ps', 'Confermata', -4)],
+    impostazioni: { NomeScuola: 'FunLab Vela', TelefonoIstruttore: '393400000000', EmailIstruttore: 'istruttore@example.com', FineStagione: fine, IndirizzoApp: 'https://prenota.funlab-vela.it',
+      AvvisoStagione: "La stagione termina il 31 ottobre e riprende il 1° marzo dell'anno successivo. Da novembre a febbraio le lezioni continuano con un calendario ridotto, per il meteo e per l'eventuale Campionato Invernale. Le uscite non usate scadono a fine stagione, salvo accordi diversi con l'istruttore." }
+  };
+}
+
+/* ---------- comunicazione con il server ---------- */
+async function call(action, payload) {
+  if (DEMO) {
+    const r = Core.handle(demo.db, token, action, payload, new Date());
+    demo.db.dirty = {};
+    return JSON.parse(JSON.stringify(r));
+  }
+  const res = await fetch(API, { method: 'POST', body: JSON.stringify({ token, action, payload }) });
+  const j = await res.json();
+  if (!j.ok) throw new Error(j.error || 'Errore del server.');
+  return j;
+}
+async function run(action, payload, opts) {
+  if (S.busy) return null;
+  S.busy = true; document.body.style.cursor = 'progress';
+  try {
+    const r = await call(action, payload);
+    S.role = r.role; S.view = r.view; S.nome = r.nome;
+    if (r.msg && !(opts && opts.quiet)) toast(r.msg);
+    return r;
+  } catch (e) {
+    S.lastError = e.message || 'Qualcosa non ha funzionato. Riprova.';
+    toast(S.lastError);
+    return null;
+  } finally { S.busy = false; document.body.style.cursor = ''; render(); if (S.open) S.open(); }
+}
+
+let toastTimer;
+function toast(text) { const t = $('#toast'); t.textContent = text; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 3200); }
+
+/* ---------- pannello ---------- */
+function openPanel(fn) { S.open = fn; fn(); const d = $('#dlg'); if (!d.open) d.showModal(); }
+function panel(title, sub, body) {
+  $('#dlg-body').innerHTML = `<div class="dlg-head"><div><h2>${title}</h2>${sub ? `<div class="muted small">${sub}</div>` : ''}</div><button class="x" type="button" data-act="close" aria-label="Chiudi">×</button></div>${body}`;
+}
+function closePanel() { S.open = null; const d = $('#dlg'); if (d.open) d.close(); }
+$('#dlg').addEventListener('close', () => { S.open = null; });
+
+/* ---------- testata e schede ---------- */
+const TABS = {
+  istruttore: [['oggi', 'Oggi'], ['calendario', 'Calendario'], ['allievi', 'Allievi'], ['impostazioni', 'Impostazioni']],
+  allievo: [['lezioni', 'Lezioni'], ['profilo', 'Il mio profilo']]
+};
+function render() {
+  const v = S.view;
+  if (!v) return;
+  $('#school').textContent = v.impostazioni.NomeScuola || 'Scuola di vela';
+  $('#who').textContent = S.role === 'istruttore' ? 'Area istruttore' : 'Ciao ' + firstName(S.nome);
+  $('#refresh').hidden = false;
+  const tabs = TABS[S.role];
+  if (!tabs.some(t => t[0] === S.tab)) S.tab = tabs[0][0];
+  const todoCount = S.role === 'istruttore' ? Object.values(v.todo).reduce((n, l) => n + l.length, 0) : 0;
+  $('#tabs').innerHTML = tabs.map(([k, label]) => `<button type="button" data-act="tab" data-id="${k}" ${S.tab === k ? 'aria-current="page"' : ''}>${label}${k === 'oggi' && todoCount ? `<span class="dot">${todoCount}</span>` : ''}</button>`).join('');
+  const views = { oggi: viewOggi, calendario: viewCalendario, allievi: viewAllievi, impostazioni: viewImpostazioni, lezioni: viewLezioni, profilo: viewProfilo };
+  $('#main').innerHTML = demoBar() + views[S.tab]();
+}
+function demoBar() {
+  if (!DEMO) return '';
+  const opts = [['demo-istruttore', 'Istruttore'], ['demo-mario', 'Mario (allievo)'], ['demo-luca', 'Luca (base e avanzato)'], ['demo-giulia', 'Giulia (senza uscite)'], ['demo-paolo', 'Paolo (spento)']];
+  return `<div class="demo"><strong>Modalità prova</strong><span>Dati finti, niente viene salvato. Guarda l'app come:</span>
+    <select id="demo-role" aria-label="Guarda l'app come">${opts.map(([t, l]) => `<option value="${t}" ${t === token ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`;
+}
+
+/* ---------- istruttore: Oggi ---------- */
+function viewOggi() {
+  const v = S.view, t = v.todo;
+  const tile = (n, label, cls) => `<div class="tile ${n ? cls : 'zero'}"><span>${label}</span><b>${n}</b></div>`;
+  let h = '';
+  if (v.stagioneScaduta) h += `<div class="warn">La data di fine stagione è passata. Aggiornala in Impostazioni, così i nuovi pacchetti scadono al momento giusto.</div>`;
+  if (S.notify.length) h += `<div class="notify"><strong>Avvisa su WhatsApp</strong>${S.notify.map((n, i) => `<div class="between"><span>${esc(n.text)}</span><span class="row">
+    ${n.link ? `<a class="btn wa" href="${esc(n.link)}" target="_blank" rel="noopener" data-act="notifyDone" data-id="${i}">Invia a ${esc(firstName(n.nome))}</a>` : '<span class="muted small">Manca il telefono</span>'}
+    <button class="btn ghost" type="button" data-act="notifyDone" data-id="${i}">Non serve</button></span></div>`).join('')}</div>`;
+  h += `<div class="tiles">${tile(t.richieste.length, 'Da confermare', 't-red')}${tile(t.daDecidere.length, 'Un solo allievo', 't-amber')}${tile(t.promemoria.length, 'Promemoria domani', 't-blue')}</div>`;
+
+  const items = [];
+  t.richieste.forEach(b => items.push(`<div class="todo-item"><div class="stripe s-richiesta"></div><div>
+    <strong>${esc(b.Nome)}</strong> chiede la lezione <strong>${esc(b.Corso)}</strong><div class="muted small">${when(b.Inizio)}</div>
+    <div class="row acts"><button class="btn primary" type="button" data-act="confirm" data-id="${b.ID}">Conferma</button><button class="btn danger" type="button" data-act="reject" data-id="${b.ID}">Rifiuta</button></div></div></div>`));
+  t.daDecidere.forEach(L => {
+    const iscritti = L.Iscritti.filter(p => p.Occupa).map(p => firstName(p.Nome));
+    items.push(`<div class="todo-item"><div class="stripe s-uno"></div><div>
+    <strong>${esc(L.Corso)}, ${when(L.Inizio)}</strong>: ${iscritti.length ? 'c\'è solo ' + esc(iscritti.join(', ')) : 'nessun iscritto'}
+    <div class="muted small">Mancano meno di 48 ore. Decidi se farla individuale o annullarla.</div>
+    <div class="row acts">${iscritti.length ? `<button class="btn primary" type="button" data-act="individuale" data-id="${L.ID}">Fai individuale</button>` : ''}
+    <button class="btn danger" type="button" data-act="annullaPochi" data-id="${L.ID}" data-arm="Tocca ancora per annullare">Annulla lezione</button></div></div></div>`);
+  });
+  t.daAvvisare.forEach(b => items.push(`<div class="todo-item"><div class="stripe s-annullata"></div><div>
+    Avvisa <strong>${esc(b.Nome)}</strong>: lezione ${esc(b.Corso)} di ${when(b.Inizio)} annullata${b.Motivo ? ' (' + esc(b.Motivo) + ')' : ''}
+    <div class="row acts">${b.Telefono ? `<a class="btn wa" href="${esc(wa(b.Telefono, MSG.annullata(b)))}" target="_blank" rel="noopener" data-act="notified" data-id="${b.ID}">Avvisa su WhatsApp</a>` : '<span class="muted small">Manca il telefono</span>'}
+    <button class="btn ghost" type="button" data-act="notifiedOnly" data-id="${b.ID}">Già avvisato</button></div></div></div>`));
+  t.promemoria.forEach(b => items.push(`<div class="todo-item"><div class="stripe" style="background:var(--sea)"></div><div>
+    Promemoria per <strong>${esc(b.Nome)}</strong>: ${esc(b.Corso)} domani, ${fTime.format(new Date(b.Inizio))}
+    <div class="row acts">${b.Telefono ? `<a class="btn wa" href="${esc(wa(b.Telefono, MSG.promemoria(b)))}" target="_blank" rel="noopener" data-act="reminder" data-id="${b.ID}">Invia promemoria</a>` : ''}
+    <button class="btn ghost" type="button" data-act="reminderOnly" data-id="${b.ID}">Non serve</button></div></div></div>`));
+
+  h += `<section class="card"><h2>Da fare ora</h2><div class="todo" style="margin-top:.5rem">${items.join('') || '<p class="empty">Tutto in ordine: non c\'è niente da fare.</p>'}</div></section>`;
+  const next = v.lezioni.filter(L => L.Ore > 0 && L.Stato !== 'Annullata').slice(0, 4);
+  h += `<section class="card"><div class="between"><h2>Prossime lezioni</h2><button class="btn ghost" type="button" data-act="tab" data-id="calendario">Apri calendario</button></div>
+    <div class="list" style="margin-top:.5rem">${next.map(L => `<div class="list-item"><button class="link" type="button" data-act="lesson" data-id="${L.ID}"><strong>${when(L.Inizio)}</strong> · ${esc(L.Corso)}
+    <div class="muted small">${L.Confermati}/${L.PostiTotali} confermati${L.Note ? ' · ' + esc(L.Note) : ''}</div></button><span class="chip ${SEMCHIP[L.Semaforo]}">${SEM[L.Semaforo]}</span></div>`).join('') || '<p class="empty">Nessuna lezione in programma. Aggiungile dal calendario.</p>'}</div></section>`;
+  return h;
+}
+
+/* ---------- istruttore: Calendario ---------- */
+function weekDays() {
+  const start = Core.shiftDay(S.view.oggi, S.week * 7);
+  return Array.from({ length: 7 }, (_, i) => Core.shiftDay(start, i));
+}
+function lessonCard(L) {
+  const names = L.Iscritti.filter(p => p.Occupa).map(p => firstName(p.Nome) + (p.Stato === 'Richiesta' ? '?' : ''));
+  return `<button class="lesson st-${L.Semaforo}" type="button" data-act="lesson" data-id="${L.ID}">
+    <div class="h">${fTime.format(new Date(L.Inizio))} ${esc(L.Corso)}</div>
+    <div class="s">${L.Semaforo === 'annullata' ? 'annullata' : L.Occupati + '/' + L.PostiTotali + (names.length ? ' · ' + esc(names.join(', ')) : '')}</div></button>`;
+}
+function viewCalendario() {
+  const days = weekDays(), v = S.view;
+  const label = new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long' });
+  const d0 = new Date(days[0] + 'T12:00:00'), d6 = new Date(days[6] + 'T12:00:00');
+  const cols = days.map(k => {
+    const ls = v.lezioni.filter(L => dayKey(L.Inizio) === k);
+    const head = fDay.format(new Date(k + 'T12:00:00'));
+    return `<div class="day"><div class="day-h ${k === v.oggi ? 'today' : ''}">${head}${k === v.oggi ? ' · oggi' : ''}</div><div>${ls.map(lessonCard).join('') || '<div class="day-empty">—</div>'}</div></div>`;
+  }).join('');
+  return `<section class="card"><div class="between"><div class="row">
+      <button class="btn ghost" type="button" data-act="week" data-id="-1" aria-label="Settimana precedente">‹</button>
+      <h2>${label.format(d0)} – ${label.format(d6)}</h2>
+      <button class="btn ghost" type="button" data-act="week" data-id="1" aria-label="Settimana successiva">›</button>
+      ${S.week ? '<button class="btn ghost" type="button" data-act="week" data-id="0">Oggi</button>' : ''}</div>
+      <button class="btn primary" type="button" data-act="newLesson">+ Nuova lezione</button></div>
+    <div class="legend" style="margin:.75rem 0"><span><i class="s-richiesta"></i>da confermare</span><span><i class="s-uno"></i>un solo allievo</span><span><i class="s-completa"></i>completa o individuale</span><span><i class="s-libera"></i>libera</span><span><i class="s-evento"></i>evento</span><span><i class="s-annullata"></i>annullata</span></div>
+    <div class="week">${cols}</div></section>`;
+}
+function lessonPanel(id) {
+  const L = S.view.lezioni.find(x => x.ID === id);
+  if (!L) return closePanel();
+  const future = L.Ore > 0;
+  const people = L.Iscritti.map(p => {
+    const b = Object.assign({}, p, { Corso: L.Corso, Inizio: L.Inizio, Motivo: L.Motivo });
+    let acts = '';
+    if (L.Stato !== 'Annullata' && p.Stato === 'Richiesta' && future) acts = `<button class="btn primary" type="button" data-act="confirm" data-id="${p.ID}">Conferma</button><button class="btn danger" type="button" data-act="reject" data-id="${p.ID}">Rifiuta</button>`;
+    else if (L.Stato === 'Annullata' && (p.Stato === 'Richiesta' || p.Stato === 'Confermata') && future && p.Telefono)
+      acts = `<a class="btn wa" href="${esc(wa(p.Telefono, MSG.annullata(b)))}" target="_blank" rel="noopener" data-act="notified" data-id="${p.ID}">${p.Avvisato ? 'Avvisa di nuovo' : 'Avvisa'}</a>`;
+    const chip = L.Stato === 'Annullata' && (p.Stato === 'Richiesta' || p.Stato === 'Confermata') ? `<span class="chip c-grey">${p.Avvisato ? 'avvisato' : 'da avvisare'}</span>` : `<span class="chip ${STATOCHIP[p.Stato] || 'c-grey'}">${esc(p.Stato)}</span>`;
+    return `<div class="list-item"><div><strong>${esc(p.Nome)}</strong> ${chip}</div><div class="row">${acts}</div></div>`;
+  }).join('') || '<p class="empty">Ancora nessun iscritto.</p>';
+  let acts = '';
+  if (future && L.Stato !== 'Annullata') {
+    if (L.DaDecidere && L.Confermati > 0) acts += `<button class="btn primary" type="button" data-act="individuale" data-id="${L.ID}">Fai individuale</button>`;
+    acts += `<button class="btn danger" type="button" data-act="annullaMeteo" data-id="${L.ID}" data-arm="Tocca ancora per annullare">Annulla per meteo</button>`;
+    acts += `<button class="btn ghost" type="button" data-act="annullaPochi" data-id="${L.ID}" data-arm="Tocca ancora per annullare">Annulla per altro motivo</button>`;
+  }
+  if (future && L.Stato === 'Annullata') acts += `<button class="btn ghost" type="button" data-act="riapri" data-id="${L.ID}">Riapri la lezione</button>`;
+  if (!L.Iscritti.length) acts += `<button class="btn ghost" type="button" data-act="deleteLesson" data-id="${L.ID}" data-arm="Tocca ancora per eliminare">Elimina</button>`;
+  const meteoHint = future && L.Stato !== 'Annullata' ? `<p class="muted small">${L.Ore < 24 ? 'Attenzione: mancano meno di 24 ore.' : 'Puoi annullare per meteo fino a 24 ore prima (entro ' + when(new Date(new Date(L.Inizio).getTime() - 864e5)) + ').'}</p>` : '';
+  panel(`${esc(L.Corso)} · ${when(L.Inizio)}`, `${L.DurataOre} ore${L.Note ? ' · ' + esc(L.Note) : ''}${L.Motivo ? ' · annullata: ' + esc(L.Motivo) : ''}`,
+    `<div class="row"><span class="chip ${SEMCHIP[L.Semaforo]}">${SEM[L.Semaforo]}</span><span class="muted small">${L.Occupati} su ${L.PostiTotali} posti occupati, ${L.Confermati} confermati</span></div>
+    <div><h3>Iscritti</h3><div class="list">${people}</div></div>
+    ${L.Corso !== 'Evento' && future && L.Stato !== 'Annullata' ? `<div class="between"><span><strong>Posti extra:</strong> ${L.PostiExtra} su 2 <span class="muted small">(solo casi eccezionali)</span></span>
+      <span class="row"><button class="btn ghost" type="button" data-act="seat" data-id="${L.ID}" data-delta="-1" ${L.PostiExtra ? '' : 'disabled'} aria-label="Togli posto extra">−</button><button class="btn ghost" type="button" data-act="seat" data-id="${L.ID}" data-delta="1" ${L.PostiExtra >= 2 ? 'disabled' : ''} aria-label="Aggiungi posto extra">+</button></span></div>` : ''}
+    ${meteoHint}<div class="row">${acts}</div>`);
+}
+function newLessonPanel() {
+  const v = S.view;
+  panel('Nuova lezione', 'Gli allievi la vedono subito nell\'app', `<form class="form" data-form="addLessons">
+    <div class="grid2"><label>Giorno<input type="date" name="giorno" id="nl-giorno" required value="${Core.shiftDay(v.oggi, 1)}"></label><label>Ora<input type="time" name="ora" id="nl-ora" required value="10:00"></label></div>
+    <div class="grid2"><label>Corso<select name="corso" id="nl-corso"><option>Base</option><option>Avanzato</option><option>Evento</option></select></label>
+      <label>Posti<input type="number" name="posti" id="nl-posti" min="1" max="30" value="2"><span class="hint">Sul FUN di norma 2</span></label></div>
+    <div class="grid2"><label>Durata in ore<input type="number" name="durata" id="nl-durata" min="1" max="12" step="0.5" value="3"></label>
+      <label>Ripeti ogni settimana<select name="settimane" id="nl-sett">${[1, 2, 3, 4, 6, 8, 10, 12].map(n => `<option value="${n}">${n === 1 ? 'No, solo questa' : 'per ' + n + ' settimane'}</option>`).join('')}</select></label></div>
+    <label>Note<input type="text" name="note" id="nl-note" placeholder="Regata sociale"></label>
+    <div class="card small" id="nl-hint" style="background:var(--bg)"></div>
+    <button class="btn primary" type="submit">Aggiungi al calendario</button></form>`);
+  $('#nl-corso').addEventListener('change', e => { $('#nl-posti').value = e.target.value === 'Evento' ? 8 : 2; lessonHint(); });
+  $('#nl-giorno').addEventListener('change', lessonHint);
+  lessonHint();
+}
+function lessonHint() {
+  const day = $('#nl-giorno').value, corso = $('#nl-corso').value, box = $('#nl-hint');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) { box.textContent = ''; return; }
+  const we = isWeekend(day), av = availableFor(day, corso);
+  const quando = we ? 'nel weekend' : 'in settimana';
+  box.innerHTML = av.length
+    ? `<strong>${av.length === 1 ? '1 allievo attivo può' : av.length + ' allievi attivi possono'}</strong> uscire ${quando}: ${esc(av.map(x => firstName(x.nome) + (x.uscite === null ? '' : ' (' + x.uscite + ')')).join(', '))}${corso !== 'Evento' ? `<div class="muted">Tra parentesi le uscite ${esc(corso)} rimaste.</div>` : ''}`
+    : `Nessun allievo attivo ha indicato di preferire uscire ${quando}.`;
+}
+
+/* ---------- istruttore: Allievi ---------- */
+const STATO_INFO = {
+  'Attivo': ['c-green', 'Attivi', 'Sta facendo il corso.'],
+  'Interessato': ['c-blue', 'Interessati', 'Non frequenta, ma riceve eventi, attività e newsletter.'],
+  'Non attivo': ['c-grey', 'Non attivi', 'Ha finito o è in pausa: non riceve comunicazioni. Può ancora entrare nell\'app.'],
+  'Spento': ['c-grey', 'Spenti', 'Nessuna comunicazione, fuori dalla newsletter e accesso all\'app disattivato.']
+};
+const PREF_LABEL = { Indifferente: 'Qualsiasi giorno', Feriali: 'Infrasettimanale', Weekend: 'Weekend' };
+const PREF_STUDENT = { Indifferente: 'Qualsiasi giorno', Feriali: 'Durante la settimana', Weekend: 'Nel weekend' };
+function creditChips(c) {
+  return `<span class="chip ${c.Base ? 'c-blue' : 'c-grey'}">Base ${c.Base}</span> <span class="chip ${c.Avanzato ? 'c-blue' : 'c-grey'}">Avanzato ${c.Avanzato}</span>`;
+}
+function isWeekend(day) { const p = day.split('-').map(Number); const d = new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay(); return d === 0 || d === 6; }
+function availableFor(day, corso) {
+  const we = isWeekend(day);
+  return S.view.allievi.filter(a => a.Stato === 'Attivo' && (a.Preferenza === 'Indifferente' || a.Preferenza === (we ? 'Weekend' : 'Feriali')))
+    .map(a => ({ nome: a.Nome, uscite: corso === 'Evento' ? null : (a.Crediti[corso] || 0) }));
+}
+function viewAllievi() {
+  const all = S.view.allievi, f = S.filtro || 'Attivo';
+  const count = s => all.filter(a => a.Stato === s).length;
+  const list = f === 'Tutti' ? all : all.filter(a => a.Stato === f);
+  const conUscite = all.filter(a => a.Stato === 'Attivo' && a.Crediti.Base + a.Crediti.Avanzato > 0);
+  const planning = [['Feriali', 'Infrasettimanale'], ['Weekend', 'Weekend'], ['Indifferente', 'Qualsiasi giorno']].map(([k, label]) => {
+    const g = conUscite.filter(a => a.Preferenza === k);
+    return `<div class="credit ${g.length ? '' : 'none'}"><b>${g.length}</b>${label}<div class="small" style="margin-top:.3rem">${esc(g.map(a => firstName(a.Nome)).join(', ')) || '—'}</div></div>`;
+  }).join('');
+  const filters = ['Attivo', 'Interessato', 'Non attivo', 'Spento', 'Tutti'].map(s => `<button class="btn ${f === s ? 'primary' : 'ghost'}" type="button" data-act="filtro" data-id="${s}">${s === 'Tutti' ? 'Tutti' : STATO_INFO[s][1]} ${s === 'Tutti' ? all.length : count(s)}</button>`).join('');
+  const rows = list.map(a => `<div class="list-item"><button class="link" type="button" data-act="student" data-id="${a.ID}"><strong>${esc(a.Nome)}</strong>
+      ${a.Stato !== 'Attivo' ? `<span class="chip ${STATO_INFO[a.Stato][0]}">${esc(a.Stato)}</span>` : ''}
+      <div class="small" style="margin-top:.25rem">${a.Stato === 'Attivo' ? creditChips(a.Crediti) + ' ' : ''}<span class="chip c-violet">${PREF_LABEL[a.Preferenza]}</span>${a.NotePreferenze ? ' <span class="muted">' + esc(a.NotePreferenze) + '</span>' : ''}</div></button>
+      ${a.Telefono && a.Stato !== 'Spento' ? `<a class="btn wa" href="${esc(wa(a.Telefono))}" target="_blank" rel="noopener" aria-label="Scrivi a ${esc(a.Nome)} su WhatsApp">WhatsApp</a>` : ''}</div>`).join('');
+  const contatti = all.filter(a => a.Stato === 'Attivo' || a.Stato === 'Interessato');
+  return `<section class="card"><h2>Per programmare il calendario</h2><p class="muted small">Allievi attivi con uscite ancora da fare, divisi per giorni preferiti.</p><div class="credits" style="margin-top:.5rem">${planning}</div></section>
+    <section class="card"><div class="between"><h2>Allievi</h2><button class="btn primary" type="button" data-act="newStudent">+ Nuovo allievo</button></div>
+    <div class="row" style="margin-top:.75rem">${filters}</div>
+    <div class="list" style="margin-top:.5rem">${rows || `<p class="empty">${all.length ? 'Nessun allievo in questo gruppo.' : 'Aggiungi il primo allievo con il pulsante qui sopra.'}</p>`}</div></section>
+    <section class="card"><h2>Contatti per eventi e newsletter</h2><p class="muted small">${contatti.length} persone tra attivi e interessati. Non attivi e spenti sono esclusi. Copia l'elenco e incollalo nella tua newsletter o in un messaggio.</p>
+    <div class="row" style="margin-top:.5rem"><button class="btn ghost" type="button" data-act="copyContacts" data-id="email">Copia le email</button><button class="btn ghost" type="button" data-act="copyContacts" data-id="tel">Copia i numeri</button></div></section>`;
+}
+function studentPanel(id) {
+  const a = S.view.allievi.find(x => x.ID === id);
+  if (!a) return closePanel();
+  const packs = a.Pacchetti.map(k => `<div class="list-item"><div><strong>${esc(k.Corso)}</strong>: ${k.Rimanenti} di ${k.Uscite} rimaste
+      <div class="muted small">${k.Scaduto ? 'Scaduto il ' : 'Scade il '}${k.Scadenza ? fDate.format(new Date(k.Scadenza)) : '—'}</div></div>
+      <button class="btn ghost" type="button" data-act="editPack" data-id="${k.ID}" data-student="${a.ID}">Modifica</button></div>`).join('') || '<p class="empty">Nessun pacchetto.</p>';
+  panel(esc(a.Nome), [a.Telefono ? '+' + a.Telefono : 'telefono mancante', a.Email].filter(Boolean).map(esc).join(' · '),
+    `<div class="credits"><div class="credit ${a.Crediti.Base ? '' : 'none'}"><b>${a.Crediti.Base}</b>uscite Base</div><div class="credit ${a.Crediti.Avanzato ? '' : 'none'}"><b>${a.Crediti.Avanzato}</b>uscite Avanzato</div><div class="credit none"><b>${a.Fatte}</b>lezioni fatte</div></div>
+    <div><h3>Stato</h3><div class="row" style="margin-top:.4rem">${Core.STATI.map(s => `<button class="btn ${a.Stato === s ? 'primary' : 'ghost'}" type="button" data-act="setStatus" data-id="${a.ID}" data-stato="${s}" ${a.Stato === s ? 'aria-pressed="true"' : ''}>${s}</button>`).join('')}</div>
+      <p class="muted small">${STATO_INFO[a.Stato][2]}</p></div>
+    <div><h3>Giorni preferiti</h3><p style="margin:.3rem 0 0"><span class="chip c-violet">${PREF_LABEL[a.Preferenza]}</span> ${esc(a.NotePreferenze)}</p></div>
+    <div><div class="between"><h3>Pacchetti</h3><span class="row"><button class="btn ghost" type="button" data-act="addPack" data-id="${a.ID}" data-corso="Base">+ Base</button><button class="btn ghost" type="button" data-act="addPack" data-id="${a.ID}" data-corso="Avanzato">+ Avanzato</button></span></div><div class="list">${packs}</div></div>
+    <div><h3>Link personale</h3><p class="muted small">L'allievo entra nell'app con questo link, senza password.</p><div class="copy">${esc(studentLink(a))}</div>
+      <div class="row" style="margin-top:.5rem">${a.Telefono ? `<a class="btn wa" href="${esc(wa(a.Telefono, MSG.link(a)))}" target="_blank" rel="noopener">Invia link su WhatsApp</a>` : ''}
+      <button class="btn ghost" type="button" data-act="copyLink" data-id="${a.ID}">Copia link</button>
+      <button class="btn ghost" type="button" data-act="newLink" data-id="${a.ID}" data-arm="Tocca ancora: il vecchio link smetterà di funzionare">Nuovo link</button></div></div>
+    <details><summary><strong>Modifica dati</strong></summary><form class="form" data-form="updateStudent" style="margin-top:.75rem"><input type="hidden" name="id" value="${a.ID}">
+      <label>Nome<input name="nome" id="ed-nome" required value="${esc(a.Nome)}"></label>
+      <div class="grid2"><label>Telefono<input name="telefono" id="ed-tel" inputmode="tel" value="${esc(a.Telefono)}"><span class="hint">39 e il numero, senza spazi</span></label><label>Email<input name="email" id="ed-email" type="email" value="${esc(a.Email)}"></label></div>
+      ${prefFields('ed', a.Preferenza, a.NotePreferenze)}
+      <label>Note<input name="note" id="ed-note" value="${esc(a.Note)}"></label><button class="btn primary" type="submit">Salva</button></form></details>`);
+}
+function addPackPanel(id, corso) {
+  const a = S.view.allievi.find(x => x.ID === id), s = S.view.impostazioni;
+  panel(`Nuovo pacchetto ${corso}`, esc(a.Nome), `<form class="form" data-form="addPackage"><input type="hidden" name="allievoId" value="${a.ID}"><input type="hidden" name="corso" value="${corso}">
+    ${corso === 'Avanzato' && a.Crediti.Base > 0 ? `<div class="warn">Attenzione: ${esc(firstName(a.Nome))} ha ancora ${a.Crediti.Base} uscite del corso Base da usare.</div>` : ''}
+    <div class="grid2"><label>Uscite<input type="number" name="uscite" id="np-uscite" min="1" max="20" value="4"></label><label>Scadenza<input type="date" name="scadenza" id="np-scad" value="${esc(s.FineStagione)}"><span class="hint">Fine stagione, salvo accordi diversi</span></label></div>
+    <div class="card" style="background:var(--bg)"><strong>Da dire all'allievo</strong><p class="small" style="margin:.3rem 0 0">${esc(s.AvvisoStagione)}</p></div>
+    <button class="btn primary" type="submit">Aggiungi pacchetto</button></form>`);
+}
+function editPackPanel(id, studentId) {
+  const a = S.view.allievi.find(x => x.ID === studentId), k = a && a.Pacchetti.find(x => x.ID === id);
+  if (!k) return closePanel();
+  panel(`Pacchetto ${esc(k.Corso)}`, esc(a.Nome) + ' · ' + k.Usate + ' uscite usate', `<form class="form" data-form="updatePackage"><input type="hidden" name="id" value="${k.ID}"><input type="hidden" name="back" value="${a.ID}">
+    <div class="grid2"><label>Uscite totali<input type="number" name="uscite" id="ep-uscite" min="1" max="40" value="${k.Uscite}"></label><label>Scadenza<input type="date" name="scadenza" id="ep-scad" value="${k.Scadenza ? dayKey(k.Scadenza) : ''}"></label></div>
+    <div class="row"><button class="btn primary" type="submit">Salva</button>${k.Usate ? '' : `<button class="btn danger" type="button" data-act="deletePack" data-id="${k.ID}" data-student="${a.ID}" data-arm="Tocca ancora per eliminare">Elimina</button>`}
+    <button class="btn ghost" type="button" data-act="student" data-id="${a.ID}">Indietro</button></div></form>`);
+}
+function prefFields(prefix, pref, note) {
+  return `<div class="grid2"><label>Giorni preferiti<select name="preferenza" id="${prefix}-pref">${Core.PREFERENZE.map(k => `<option value="${k}" ${k === pref ? 'selected' : ''}>${PREF_STUDENT[k]}</option>`).join('')}</select></label>
+    <label>Note sui giorni<input name="notePreferenze" id="${prefix}-pnote" maxlength="200" value="${esc(note || '')}" placeholder="Solo dopo le 17, mai la domenica"></label></div>`;
+}
+function newStudentPanel() {
+  panel('Nuovo allievo', 'Poi aggiungi il pacchetto e mandagli il link', `<form class="form" data-form="addStudent">
+    <label>Nome e cognome<input name="nome" id="ns-nome" required autocomplete="off"></label>
+    <div class="grid2"><label>Telefono<input name="telefono" id="ns-tel" inputmode="tel" placeholder="393331234567"><span class="hint">39 e il numero, senza spazi</span></label><label>Email<input name="email" id="ns-email" type="email" placeholder="nome@gmail.com"></label></div>
+    ${prefFields('ns', 'Indifferente', '')}
+    <label>Note<input name="note" id="ns-note"></label><button class="btn primary" type="submit">Aggiungi allievo</button></form>`);
+}
+
+/* ---------- istruttore: Impostazioni ---------- */
+function viewImpostazioni() {
+  const s = S.view.impostazioni;
+  return `<section class="card"><h2>Impostazioni</h2><form class="form" data-form="saveSettings" style="margin-top:.75rem">
+    <label>Nome della scuola<input name="NomeScuola" id="st-nome" value="${esc(s.NomeScuola)}"></label>
+    <div class="grid2"><label>Il tuo cellulare<input name="TelefonoIstruttore" id="st-tel" inputmode="tel" value="${esc(s.TelefonoIstruttore)}"><span class="hint">Gli allievi ti scrivono qui su WhatsApp</span></label>
+    <label>Email per il riepilogo del mattino<input name="EmailIstruttore" id="st-email" type="email" value="${esc(s.EmailIstruttore)}"><span class="hint">Ti arriva solo se c'è qualcosa da fare</span></label></div>
+    <label>Fine stagione<input type="date" name="FineStagione" id="st-fine" value="${esc(s.FineStagione)}"><span class="hint">Scadenza proposta per i nuovi pacchetti</span></label>
+    <label>Avviso stagione<textarea name="AvvisoStagione" id="st-avviso">${esc(s.AvvisoStagione)}</textarea><span class="hint">Lo vedono gli allievi nel profilo e tu quando registri un pacchetto</span></label>
+    <label>Indirizzo dell'app<input name="IndirizzoApp" id="st-url" value="${esc(s.IndirizzoApp)}"><span class="hint">Serve per creare i link personali</span></label>
+    <button class="btn primary" type="submit">Salva impostazioni</button></form></section>`;
+}
+
+/* ---------- allievo: Lezioni ---------- */
+function viewLezioni() {
+  const v = S.view, me = v.me, tel = v.impostazioni.TelefonoIstruttore;
+  const byDay = {};
+  v.lezioni.forEach(l => { (byDay[dayKey(l.Inizio)] = byDay[dayKey(l.Inizio)] || []).push(l); });
+  const slots = v.lezioni.map(l => {
+    let act = '';
+    if (l.Mia) act = `<span class="chip ${l.Mia === 'Confermata' ? 'c-green' : 'c-amber'}">${l.Mia === 'Confermata' ? 'Confermata' : 'In attesa di conferma'}</span>`;
+    else if (l.PuoiPrenotare) act = `<button class="btn primary" type="button" data-act="book" data-id="${l.ID}">Prenota</button>`;
+    else if (l.Motivo === 'crediti') act = `<span class="muted small">Non hai uscite ${esc(l.Corso)}: parlane con l'istruttore.</span>`;
+    else if (l.Motivo === 'tardi' && tel) act = `<a class="btn wa" href="${esc(wa(tel, MSG.tardi(S.nome, l)))}" target="_blank" rel="noopener">Chiedi all'istruttore</a><div class="muted small">Mancano meno di 48 ore</div>`;
+    else if (l.Motivo === 'evento' && tel) act = `<a class="btn wa" href="${esc(wa(tel, MSG.evento(S.nome, l)))}" target="_blank" rel="noopener">Chiedi informazioni</a><div class="muted small">Si paga a parte</div>`;
+    const d = new Date(l.Inizio);
+    return `<div class="slot"><div class="when">${fTime.format(d)}<span>${fDay.format(d)}</span></div><div class="between"><div><strong>${esc(l.Corso)}</strong>${l.Note ? ' · ' + esc(l.Note) : ''}
+      <div class="muted small">${l.Liberi > 0 ? l.Liberi + (l.Liberi === 1 ? ' posto libero' : ' posti liberi') : 'completa'} · ${l.DurataOre} ore</div></div><div>${act}</div></div></div>`;
+  }).join('');
+  return `<div class="credits"><div class="credit ${me.Crediti.Base ? '' : 'none'}"><b>${me.Crediti.Base}</b>uscite Base</div><div class="credit ${me.Crediti.Avanzato ? '' : 'none'}"><b>${me.Crediti.Avanzato}</b>uscite Avanzato</div></div>
+    <section class="card"><h2>Lezioni in calendario</h2><p class="muted small">Prenota almeno 48 ore prima. L'istruttore conferma ogni prenotazione.</p><div>${slots || '<p class="empty">Al momento non ci sono lezioni con posti liberi. Torna a controllare più avanti.</p>'}</div></section>`;
+}
+
+/* ---------- allievo: Profilo ---------- */
+function viewProfilo() {
+  const v = S.view, me = v.me, tel = v.impostazioni.TelefonoIstruttore;
+  const book = v.prenotazioni.map(b => {
+    let act = '';
+    if (b.PuoiDisdire) act = `<button class="btn danger" type="button" data-act="cancel" data-id="${b.ID}" data-arm="Tocca ancora per disdire">Disdici</button>`;
+    else if (b.Tardi && tel) act = `<a class="btn wa" href="${esc(wa(tel, MSG.disdettaTardi(S.nome, b)))}" target="_blank" rel="noopener">Avvisa l'istruttore</a>`;
+    return `<div class="list-item"><div><strong>${esc(b.Corso)}</strong> · ${when(b.Inizio)}<div class="small" style="margin-top:.2rem"><span class="chip ${b.Stato === 'Richiesta' ? 'c-amber' : STATOCHIP[b.Stato] || 'c-grey'}">${b.Stato === 'Richiesta' ? 'In attesa di conferma' : esc(b.Stato)}</span>${b.Motivo && b.Stato === 'Annullata dalla scuola' ? ' <span class="muted">(' + esc(b.Motivo) + ')</span>' : ''}</div></div><div>${act}</div></div>`;
+  }).join('');
+  const packs = me.Pacchetti.map(k => `<div class="list-item"><div><strong>${esc(k.Corso)}</strong>: ${k.Rimanenti} di ${k.Uscite} uscite rimaste<div class="muted small">${k.Scaduto ? 'Scaduto il ' : 'Valido fino al '}${k.Scadenza ? fDate.format(new Date(k.Scadenza)) : '—'}</div></div></div>`).join('');
+  return `<div class="credits"><div class="credit ${me.Crediti.Base ? '' : 'none'}"><b>${me.Crediti.Base}</b>uscite Base</div><div class="credit ${me.Crediti.Avanzato ? '' : 'none'}"><b>${me.Crediti.Avanzato}</b>uscite Avanzato</div><div class="credit none"><b>${me.Fatte}</b>lezioni fatte</div></div>
+    <section class="card"><h2>Le mie prenotazioni</h2><p class="muted small">Puoi disdire fino a 48 ore prima. Dopo, avvisa l'istruttore.</p><div class="list">${book || '<p class="empty">Nessuna prenotazione. Scegli una lezione nella scheda Lezioni.</p>'}</div></section>
+    <section class="card"><h2>Quando preferisci uscire?</h2><p class="muted small">Aiuta l'istruttore a organizzare il calendario.</p>
+      <form class="form" data-form="setPreference" style="margin-top:.5rem">${prefFields('pf', me.Preferenza, me.NotePreferenze)}<div><button class="btn primary" type="submit">Salva preferenze</button></div></form></section>
+    <section class="card"><h2>I miei pacchetti</h2><div class="list">${packs || '<p class="empty">Nessun pacchetto attivo.</p>'}</div>
+    ${v.impostazioni.AvvisoStagione ? `<p class="muted small" style="margin-top:.75rem">${esc(v.impostazioni.AvvisoStagione)}</p>` : ''}</section>`;
+}
+
+/* ---------- azioni ---------- */
+const findBooking = id => {
+  const t = S.view.todo;
+  for (const b of t.richieste) if (b.ID === id) return b;
+  for (const L of S.view.lezioni) for (const p of L.Iscritti) if (p.ID === id) return Object.assign({}, p, { Corso: L.Corso, Inizio: L.Inizio });
+  return null;
+};
+const ACT = {
+  tab: el => { S.tab = el.dataset.id; S.notify = S.tab === 'oggi' ? S.notify : []; render(); window.scrollTo(0, 0); },
+  refresh: () => run('view'),
+  close: closePanel,
+  week: el => { const d = Number(el.dataset.id); S.week = d === 0 ? 0 : S.week + d; render(); },
+  lesson: el => openPanel(() => lessonPanel(el.dataset.id)),
+  newLesson: () => openPanel(newLessonPanel),
+  student: el => openPanel(() => studentPanel(el.dataset.id)),
+  newStudent: () => openPanel(newStudentPanel),
+  addPack: el => { const id = el.dataset.id, c = el.dataset.corso; S.open = () => addPackPanel(id, c); addPackPanel(id, c); },
+  editPack: el => { const id = el.dataset.id, s = el.dataset.student; S.open = () => editPackPanel(id, s); editPackPanel(id, s); },
+  confirm: async el => { const b = findBooking(el.dataset.id); if (await run('confirm', { id: el.dataset.id }) && b) pushNotify('Confermata la lezione di ' + firstName(b.Nome), b, MSG.conferma(b)); },
+  reject: async el => { const b = findBooking(el.dataset.id); if (await run('reject', { id: el.dataset.id }) && b) pushNotify('Rifiutata la richiesta di ' + firstName(b.Nome), b, MSG.rifiuto(b)); },
+  individuale: el => run('setLesson', { id: el.dataset.id, stato: 'Individuale' }),
+  annullaMeteo: el => run('setLesson', { id: el.dataset.id, stato: 'Annullata', motivo: 'meteo' }),
+  annullaPochi: el => run('setLesson', { id: el.dataset.id, stato: 'Annullata', motivo: 'pochi iscritti' }),
+  riapri: el => run('setLesson', { id: el.dataset.id, stato: 'Aperta' }),
+  deleteLesson: async el => { if (await run('deleteLesson', { id: el.dataset.id })) closePanel(); },
+  seat: el => run('extraSeat', { id: el.dataset.id, delta: Number(el.dataset.delta) }),
+  notified: el => { run('notified', { id: el.dataset.id }, { quiet: true }); return true; },
+  notifiedOnly: el => run('notified', { id: el.dataset.id }, { quiet: true }),
+  reminder: el => { run('reminderSent', { id: el.dataset.id }, { quiet: true }); return true; },
+  reminderOnly: el => run('reminderSent', { id: el.dataset.id }, { quiet: true }),
+  notifyDone: el => { S.notify.splice(Number(el.dataset.id), 1); setTimeout(render, 50); return true; },
+  copyLink: el => { const a = S.view.allievi.find(x => x.ID === el.dataset.id); const text = studentLink(a);
+    try { navigator.clipboard.writeText(text).then(() => toast('Link copiato'), () => toast('Seleziona il link e copialo a mano')); } catch (e) { toast('Seleziona il link e copialo a mano'); } },
+  newLink: el => run('newLink', { id: el.dataset.id }),
+  filtro: el => { S.filtro = el.dataset.id; render(); },
+  setStatus: el => run('setStatus', { id: el.dataset.id, stato: el.dataset.stato }),
+  copyContacts: el => {
+    const people = S.view.allievi.filter(a => a.Stato === 'Attivo' || a.Stato === 'Interessato');
+    const email = el.dataset.id === 'email';
+    const items = people.map(a => email ? a.Email : (a.Telefono ? '+' + a.Telefono : '')).filter(Boolean);
+    if (!items.length) return toast(email ? 'Nessuna email da copiare.' : 'Nessun numero da copiare.');
+    const text = items.join(email ? ', ' : '\n');
+    try { navigator.clipboard.writeText(text).then(() => toast(items.length + (email ? ' email copiate' : ' numeri copiati')), () => toast('Copia non riuscita: riprova dal computer')); } catch (e) { toast('Copia non riuscita: riprova dal computer'); }
+  },
+  deletePack: async el => { const s = el.dataset.student; if (await run('deletePackage', { id: el.dataset.id })) { S.open = () => studentPanel(s); studentPanel(s); } },
+  book: el => run('book', { lezioneId: el.dataset.id }),
+  cancel: el => run('cancel', { id: el.dataset.id })
+};
+function pushNotify(text, b, msg) {
+  S.notify.unshift({ text, nome: b.Nome, link: wa(b.Telefono, msg) });
+  closePanel(); S.tab = 'oggi'; render(); window.scrollTo(0, 0);
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) return;
+  if (el.dataset.arm && !el.classList.contains('armed')) {
+    e.preventDefault();
+    const label = el.textContent; el.classList.add('armed'); el.textContent = el.dataset.arm;
+    setTimeout(() => { if (el.isConnected) { el.classList.remove('armed'); el.textContent = label; } }, 4000);
+    return;
+  }
+  const isLink = el.tagName === 'A';
+  if (!isLink) e.preventDefault();
+  const fn = ACT[el.dataset.act];
+  if (fn) fn(el);
+});
+const FORMS = {
+  addLessons: async d => { if (await run('addLessons', d)) closePanel(); },
+  addStudent: async d => { const r = await run('addStudent', d); if (r && r.id) { S.tab = 'allievi'; render(); openPanel(() => studentPanel(r.id)); } },
+  updateStudent: async d => { await run('updateStudent', d); },
+  addPackage: async d => { const id = d.allievoId; if (await run('addPackage', d)) { S.open = () => studentPanel(id); studentPanel(id); } },
+  updatePackage: async d => { const id = d.back; if (await run('updatePackage', d)) { S.open = () => studentPanel(id); studentPanel(id); } },
+  saveSettings: async d => { await run('saveSettings', d); },
+  setPreference: async d => { await run('setPreference', d); }
+};
+document.addEventListener('submit', e => {
+  const f = e.target.closest('form[data-form]');
+  if (!f) return;
+  e.preventDefault();
+  FORMS[f.dataset.form](Object.fromEntries(new FormData(f).entries()));
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'demo-role') {
+    token = e.target.value; S.tab = null; S.notify = []; S.week = 0;
+    run('view', null, { quiet: true }).then(r => { if (!r) { $('#tabs').innerHTML = ''; $('#main').innerHTML = demoBar() + `<div class="err">${esc(S.lastError)}</div>`; } });
+  }
+});
+
+/* ---------- avvio ---------- */
+function readToken() {
+  const m = location.search.match(/[?&]k=([A-Za-z0-9-]+)/);
+  if (m) {
+    try { localStorage.setItem('funlab-token', m[1]); } catch (e) {}
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    return m[1];
+  }
+  try { return localStorage.getItem('funlab-token'); } catch (e) { return null; }
+}
+async function start() {
+  if (DEMO) { makeDemo(); token = 'demo-istruttore'; }
+  else token = readToken();
+  if (!token) {
+    $('#main').innerHTML = `<section class="card welcome"><img src="logo.png" alt="FUN Lab" onerror="this.hidden=true"><h2>Benvenuto</h2><p>Per entrare apri il link personale che ti ha mandato l'istruttore su WhatsApp.</p><p class="muted small">Il link funziona solo per te: non condividerlo.</p></section>`;
+    return;
+  }
+  const r = await run('view', null, { quiet: true });
+  if (!r && !DEMO) $('#main').innerHTML = `<div class="err">${esc(S.lastError || 'Non riesco ad aprire il tuo profilo.')} Se pensi sia un errore, controlla la connessione e riprova, oppure chiedi all'istruttore un nuovo link.</div><button class="btn" type="button" data-act="refresh">Riprova</button>`;
+}
+start();
+</script>
+
+</html>
